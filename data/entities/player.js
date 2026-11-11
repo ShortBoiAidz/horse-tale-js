@@ -1,20 +1,36 @@
 import { GAME_WIDTH, GAME_HEIGHT } from "../core/constants.js";
+import { RenderSystem } from "../systems/renderSystem.js";
 
 export class Player {
-  constructor() {
+  constructor(cvs, imageManager) {
+    this.renderSystem = new RenderSystem(cvs, imageManager);
+
     this.width = 20;
     this.height = 42;
 
-    this.scale = 2
+    this.scale = 2;
 
     this.x = (GAME_WIDTH - this.width) / 2;
     this.y = (GAME_HEIGHT - this.height) / 2;
 
     this.speed = 300;
 
-    this.speedMultiplier = 1
+    this.speedMultiplier = 1;
+
+    this.animationFrame = 0;
+    this.frameSource = 41;
+    this.staggerFrames = 8;
+    this.gameFrame = 0;
+    this.totalFrames = 8;
+
+    this.moving = false;
   }
 
+  /**
+   * Updates player position based on keypress; prevents the player from overshooting the canvas.
+   * @param {number} deltaTime - Independent frame rate based on refresh rate.
+   * @param {object} keys - Object storing keypress values.
+   */
   update(deltaTime, keys) {
     let dx = 0,
       dy = 0;
@@ -24,10 +40,11 @@ export class Player {
     const left = keys["a"] || keys["arrowleft"];
     const right = keys["d"] || keys["arrowright"];
 
-    if (up) dy -= 1;
-    if (down) dy += 1;
-    if (left) dx -= 1;
-    if (right) dx += 1;
+    /**FIXME - `this.moving` is only true if `right` is true */
+    up ? ((this.moving = true), (dy -= 1)) : (this.moving = false);
+    down ? ((this.moving = true), (dy += 1)) : (this.moving = false);
+    left ? ((this.moving = true), (dx -= 1)) : (this.moving = false);
+    right ? ((this.moving = true), (dx += 1)) : (this.moving = false);
 
     //* Normalise diagonal movement
     if (dx || dy) {

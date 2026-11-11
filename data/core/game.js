@@ -8,8 +8,8 @@ export class Game {
     this.cvs = document.getElementById("canvas");
     this.ctx = this.cvs.getContext("2d");
 
-    this.player = new Player();
     this.imageManager = new ImageManager();
+    this.player = new Player(this.cvs, this.imageManager);
     this.renderSystem = new RenderSystem(this.cvs, this.imageManager);
 
     this.imageManager.loadAll();
@@ -43,11 +43,7 @@ export class Game {
       this.keys[event.key.toLowerCase()] = false;
     });
 
-    window.addEventListener("contextmenu", () => {
-      this.keys = {};
-    });
-
-    window.addEventListener("blur", () => {
+    window.addEventListener("blur" || "contextmenu", () => {
       this.keys = {};
     });
   }
