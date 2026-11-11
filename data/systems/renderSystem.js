@@ -1,10 +1,12 @@
 import { GAME_WIDTH, GAME_HEIGHT, GRID_SIZE } from "../core/constants.js";
 
 export class RenderSystem {
-  constructor(cvs) {
+  constructor(cvs, imageManager) {
     this.cvs = cvs;
     this.ctx = cvs.getContext("2d");
     this.ctx.imageSmoothEnabled = false;
+
+    this.imageManager = imageManager;
   }
 
 
@@ -18,10 +20,17 @@ export class RenderSystem {
 
 
   renderPlayer(player) {
-    this.ctx.fillStyle = "#db0000";
-    this.ctx.fillRect(player.x, player.y, player.width, player.height);
-    this.ctx.strokeStyle = "white";
-    this.ctx.strokeRect(player.x, player.y, player.width, player.height)
+    const playerImage = this.imageManager.get('player')
+
+    if (playerImage) {
+      this.ctx.drawImage(playerImage, 42, 0, player.width, player.height, player.x, player.y, (player.width * player.scale), (player.height * player.scale));
+    } else { //TODO Make a better fallback
+      this.ctx.fillStyle = "#db0000";
+      this.ctx.fillRect(player.x, player.y, player.width, player.height);
+      this.ctx.strokeStyle = "white";
+      this.ctx.strokeRect(player.x, player.y, player.width, player.height)
+    }
+
   }
 
 

@@ -1,6 +1,7 @@
 import { GAME_HEIGHT, GAME_WIDTH } from "./constants.js";
 import { RenderSystem } from "../systems/renderSystem.js";
 import { Player } from "../entities/player.js";
+import { ImageManager } from "../managers/imageManager.js";
 
 export class Game {
   constructor() {
@@ -8,43 +9,52 @@ export class Game {
     this.ctx = this.cvs.getContext("2d");
 
     this.player = new Player();
-    this.renderSystem = new RenderSystem(this.cvs);
+    this.imageManager = new ImageManager();
+    this.renderSystem = new RenderSystem(this.cvs, this.imageManager);
 
-    this.keys = {}
+    this.imageManager.loadAll();
+
+    this.keys = {};
 
     this.init();
   }
 
-
   init() {
     this.resizeCanvas();
-    window.addEventListener('resize', () => this.resizeCanvas());
+    window.addEventListener("resize", () => this.resizeCanvas());
 
-    this.handleInput()
+    this.handleInput();
 
     //* Start game loop
-    requestAnimationFrame((timestamp) => this.gameLoop());
+    this.prevFrame = performance.now();
+    requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
   }
 
-
-  update() {
-    this.player.update(this.keys)
+  update(deltaTime) {
+    this.player.update(deltaTime, this.keys);
   }
-
 
   handleInput() {
-    window.addEventListener('keydown', (event) => {
+    window.addEventListener("keydown", (event) => {
       this.keys[event.key.toLowerCase()] = true;
     });
 
-    window.addEventListener('keyup', (event) => {
+    window.addEventListener("keyup", (event) => {
       this.keys[event.key.toLowerCase()] = false;
+    });
+
+    window.addEventListener("contextmenu", () => {
+      this.keys = {};
+    });
+
+    window.addEventListener("blur", () => {
+      this.keys = {};
     });
   }
 
-
   resizeCanvas() {
-    const ratio = 16/9;
+    // I really don't think this is very efficient when CSS exists, but here we are
+    const ratio = 16 / 9;
     let width, height;
     const margin = 5;
 
@@ -63,11 +73,11 @@ export class Game {
     this.cvs.width = GAME_WIDTH;
   }
 
-
   gameLoop(timestamp) {
-    this.update();
-    this.renderSystem.render(this.player);
+    const deltaTime = Math.min((timestamp - this.prevFrame) / 1000, 0.1);
+    this.prevFrame = timestamp;
+    this.update(deltaTime);
+    this.renderSystem.render(this.player, this.imageManager);
     requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
   }
-
 }
