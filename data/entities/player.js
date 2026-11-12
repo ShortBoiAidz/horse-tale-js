@@ -40,11 +40,16 @@ export class Player {
     const left = keys["a"] || keys["arrowleft"];
     const right = keys["d"] || keys["arrowright"];
 
-    /**FIXME - `this.moving` is only true if `right` is true */
-    up ? ((this.moving = true), (dy -= 1)) : (this.moving = false);
-    down ? ((this.moving = true), (dy += 1)) : (this.moving = false);
-    left ? ((this.moving = true), (dx -= 1)) : (this.moving = false);
-    right ? ((this.moving = true), (dx += 1)) : (this.moving = false);
+    if (up) dy -= 1;
+    if (down) dy += 1;
+    if (left) dx -= 1;
+    if (right) dx += 1;
+
+    if (up || down || left || right) {
+      this.moving = true;
+    } else {
+      this.moving = false;
+    }
 
     //* Normalise diagonal movement
     if (dx || dy) {
