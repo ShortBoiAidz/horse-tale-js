@@ -1,4 +1,4 @@
-import { GAME_WIDTH, GAME_HEIGHT } from "../core/constants.js";
+import { GAME_WIDTH, GAME_HEIGHT, BORDER_WIDTH, SPACING_WIDTH, SPRITE_HEIGHT, SPRITE_WIDTH } from "../core/constants.js";
 import { RenderSystem } from "../systems/renderSystem.js";
 
 export class Player {
@@ -17,13 +17,27 @@ export class Player {
 
     this.speedMultiplier = 1;
 
-    this.animationFrame = 0;
-    this.frameSource = 41;
-    this.staggerFrames = 8;
-    this.gameFrame = 0;
-    this.totalFrames = 8;
-
     this.moving = false;
+
+    this.row = 0;
+    this.column = 0;
+
+    this.playerMove1 = this.spritePositionToImagePosition(0, 2);
+    this.playerMove2 = this.spritePositionToImagePosition(0, 3);
+    this.playerIdle = this.spritePositionToImagePosition(0, 4);
+
+    this.walkCycle = [this.playerMove1, this.playerMove2];
+    this.idle = [this.playerIdle];
+
+    this.frameIndex = 0;
+    this.frame;
+  }
+
+  spritePositionToImagePosition(row, col) {
+    return {
+      x: col * (SPRITE_WIDTH),
+      y: row * (SPRITE_HEIGHT),
+    };
   }
 
   /**
@@ -47,6 +61,7 @@ export class Player {
 
     if (up || down || left || right) {
       this.moving = true;
+      this.frameIndex++;
     } else {
       this.moving = false;
     }

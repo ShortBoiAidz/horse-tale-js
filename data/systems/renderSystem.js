@@ -1,4 +1,10 @@
-import { GAME_WIDTH, GAME_HEIGHT, GRID_SIZE } from "../core/constants.js";
+import {
+  GAME_WIDTH,
+  GAME_HEIGHT,
+  GRID_SIZE,
+  SPRITE_HEIGHT,
+  SPRITE_WIDTH,
+} from "../core/constants.js";
 
 export class RenderSystem {
   constructor(cvs, imageManager) {
@@ -28,51 +34,53 @@ export class RenderSystem {
   renderPlayer(player) {
     const playerImage = this.imageManager.get("player");
 
-    if (playerImage) {
-      this.ctx.drawImage(
-        playerImage,
-        player.frameSource,
-        0,
-        player.width,
-        player.height,
-        player.x,
-        player.y,
-        player.width * player.scale,
-        player.height * player.scale,
-      );
-    } else {
+    if (!playerImage) {
       this.ctx.fillStyle = "#db0000";
       this.ctx.fillRect(player.x, player.y, player.width, player.height);
       this.ctx.strokeStyle = "white";
       this.ctx.strokeRect(player.x, player.y, player.width, player.height);
-    }
-
-    if (player.moving) {
-      console.log(player.moving)
+    } else {
       this.animatePlayer(player, playerImage);
     }
   }
 
   animatePlayer(player, playerImage) {
-    this.ctx.drawImage(
-      playerImage,
-      player.frameSource * 2,
-      0,
-      player.width,
-      player.height,
-      player.x,
-      player.y,
-      player.width * player.scale,
-      player.height * player.scale,
-    );
+    if (!player.moving) {
+      let walkCycle = player.walkCycle;
+      let frameIndex = (player.frameIndex = 0);
+      let frame = (player.frame = walkCycle[frameIndex]);
 
-    /**
-     * FIXME - Should double `player.frameSource` and repeat walking frames
-     * LINK - Perhaps seperate spritesheets for seperate animations
-    */
-    if (player.gameFrame % player.staggerFrames === 0) {
-      player.currentFrame = (player.currentFrame + 1) % player.totalFrames;
-      player.frameSource * 2;
+      if (frameIndex === walkCycle.length) {
+        frameIndex = 0;
+      }
+
+      this.ctx.drawImage(
+        playerImage,
+        frame.x,
+        frame.y,
+        SPRITE_WIDTH,
+        SPRITE_HEIGHT,
+        player.x,
+        player.y,
+        SPRITE_WIDTH * player.scale,
+        SPRITE_HEIGHT * player.scale,
+      );
+    } else {
+      let idle = player.idle;
+      let frameIndex = (player.frameIndex = 0);
+      let frame = (player.frame = idle[frameIndex]);
+
+      this.ctx.drawImage(
+        playerImage,
+        frame.x,
+        frame.y,
+        SPRITE_WIDTH,
+        SPRITE_HEIGHT,
+        player.x,
+        player.y,
+        SPRITE_WIDTH * player.scale,
+        SPRITE_HEIGHT * player.scale,
+      );
     }
   }
 
@@ -95,5 +103,7 @@ export class RenderSystem {
       this.ctx.lineTo(GAME_WIDTH, index);
       this.ctx.stroke();
     }
+
+    this.ctx.stroke();
   }
 }

@@ -1,4 +1,4 @@
-import { GAME_HEIGHT, GAME_WIDTH } from "./constants.js";
+import { GAME_HEIGHT, GAME_WIDTH, DEBUG } from "./constants.js";
 import { RenderSystem } from "../systems/renderSystem.js";
 import { Player } from "../entities/player.js";
 import { ImageManager } from "../managers/imageManager.js";
@@ -15,6 +15,7 @@ export class Game {
     this.imageManager.loadAll();
 
     this.keys = {};
+    this.prevTime = 0;
 
     this.init();
   }
@@ -28,6 +29,22 @@ export class Game {
     //* Start game loop
     this.prevFrame = performance.now();
     requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
+  }
+
+  gameLoop(timestamp) {
+    const deltaTime = Math.min((timestamp - this.prevFrame) / 1000, 0.1);
+
+    this.prevFrame = timestamp;
+
+    this.update(deltaTime);
+
+    this.renderSystem.render(this.player, this.imageManager);
+
+    requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
+
+    if (DEBUG) {
+      this.debug()
+    }
   }
 
   update(deltaTime) {
@@ -69,11 +86,8 @@ export class Game {
     this.cvs.width = GAME_WIDTH;
   }
 
-  gameLoop(timestamp) {
-    const deltaTime = Math.min((timestamp - this.prevFrame) / 1000, 0.1);
-    this.prevFrame = timestamp;
-    this.update(deltaTime);
-    this.renderSystem.render(this.player, this.imageManager);
-    requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
+
+  debug() {
+    console.log(`Player moving: ${this.player.moving}`)
   }
 }
